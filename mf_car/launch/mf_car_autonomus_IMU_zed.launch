@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<launch>
+	<param name="use_sim_time" value="false" />
+	
+	<!--node pkg="car_joystick" type="car_joystick" name="car_joystick"/>
+	<node pkg="joy" type="joy_node" name="joy_node"/-->
+	
+	<node pkg="traxxas_driver" type="listener_old" name="listener_old"/>
+	
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find racecar_description)/urdf/racecar.xacro'"/>
+
+	<!-- send fake joint values -->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+	<param name="use_gui" value="False"/>
+	</node>
+
+	<!-- Combine joint values -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+
+	<node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo" >
+		<param name="frame_id" value="laser" />		
+		<param name="max_ang" value="2.356194496154785" />
+        <param name="min_ang" value="-2.356194496154785" />
+	</node>
+	
+	<node pkg="tf" type="static_transform_publisher" name="odom_to_base_lnk" args="0 0 0 0 0 0 /odom /base_link 100"/>
+ 
+	<!--node name="rviz" pkg="rviz" type="rviz"/-->
+		
+	<node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+		<param name="pub_map_odom_transform" value="true"/>
+		<param name="map_frame" value="map" />
+		<param name="base_frame" value="base_link" />
+		<param name="odom_frame" value="odom" />
+    </node>
+           
+	<!-- Move base -->
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+		<rosparam file="$(find racecar_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find racecar_navigation)/config/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find racecar_navigation)/config/global_costmap_params.yaml" command="load" />
+		<rosparam file="$(find racecar_navigation)/config/base_local_planner_params.yaml" command="load" />
+
+
+		<param name="move_base/DWAPlannerROS/yaw_goal_tolerance" value="1.0"/>
+		<param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/>
+		
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<param name="controller_frequency" value="10.0" />
+
+	</node>
+	
+	<node pkg="cmd_vel_to_ackermann_drive" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"/>	
+  
+	<arg name="razor_config_file" default="$(find razor_imu_9dof)/config/my_razor.yaml"/>
+	
+	<node pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
+		<rosparam file="$(arg razor_config_file)" command="load"/>
+	</node>
+	
+	<include file="$(find zed_wrapper)/launch/zed_tf.launch" />
+
+	  <arg name="svo_file" default=""/>
+	  
+	  <group ns="camera">
+	    <node name="zed_wrapper_node" pkg="zed_wrapper" type="zed_wrapper_node" args="$(arg svo_file)" output="screen">
+
+	      <param name="resolution"            value="2" />
+	      <param name="quality"               value="1" />
+	      <param name="sensing_mode"          value="1" />
+	      <param name="frame_rate"            value="30" />
+	      <param name="odometry_DB"           value="" />
+	      <param name="openni_depth_mode"     value="0" />
+
+	      <param name="rgb_topic"             value="rgb/image_rect_color" />
+	      <param name="rgb_cam_info_topic"    value="rgb/camera_info" />
+	      <param name="rgb_frame_id"          value="/zed_center" />
+
+	      <param name="left_topic"            value="left/image_rect_color" />
+	      <param name="left_cam_info_topic"   value="left/camera_info" />
+	      <param name="left_frame_id"         value="/zed_left_camera" />
+
+	      <param name="right_topic"           value="right/image_rect_color" />
+	      <param name="right_cam_info_topic"  value="right/camera_info" />
+	      <param name="right_frame_id"        value="/zed_right_camera" />
+
+	      <param name="depth_topic"           value="depth/image_rect_color" />
+	      <param name="depth_cam_info_topic"  value="depth/camera_info" />
+	      <param name="depth_frame_id"        value="/zed_depth_camera" />
+
+	      <param name="point_cloud_topic"     value="point_cloud/cloud" />
+	      <param name="cloud_frame_id"        value="/zed_center" />
+
+	      <param name="odometry_topic"                value="odomZED" />
+	      <param name="odometry_frame_id"             value="/zed_initial_frame" />
+	      <param name="odometry_transform_frame_id"   value="/zed_center" />
+
+
+
+	    </node>
+	  </group>
+
+</launch>
+
+
+

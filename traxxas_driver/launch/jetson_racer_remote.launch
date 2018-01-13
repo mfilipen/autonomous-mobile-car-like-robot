@@ -1,0 +1,11 @@
+<launch>
+  <machine name="tegra-ubuntu" address="tegra-ubuntu" user="ubuntu"></machine>
+
+  <node machine="tegra-ubuntu" pkg="razor_imu_9dof" type="imu_node.py" name="imu_node" output="screen">
+    <rosparam file="$(find razor_imu_9dof)/config/my_razor.yaml" command="load"/>
+  </node>
+  <node machine="tegra-ubuntu" pkg="traxxas_driver" type="listener" name="listener" output="screen"/>
+  <node machine="tegra-ubuntu" name="hedge_rcv_bin" type="hedge_rcv_bin" pkg="marvelmind_nav" output="screen"/>
+  <node machine="tegra-ubuntu" name="odom_publisher" type="odom_publisher" pkg="marvelmind_nav" output="screen"/>
+  <node machine="tegra-ubuntu" name="imu_corrector" type="imu_error_corrector" pkg="marvelmind_nav" output="screen"/>
+</launch>

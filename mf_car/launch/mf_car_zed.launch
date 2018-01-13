@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<launch>
+	<param name="use_sim_time" value="false" />
+	
+	
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find racecar_description)/urdf/racecar.xacro'"/>
+
+	<!-- send fake joint values -->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+	<param name="use_gui" value="False"/>
+	</node>
+
+	<!-- Combine joint values -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+	
+	<node pkg="tf" type="static_transform_publisher" name="odom_to_base_lnk" args="0 0 0 0 0 0 /odom /base_link 100"/>
+	
+	<node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard"  output="screen"></node>
+
+	<node pkg="traxxas_driver" type="listener_old" name="listener_old"/>
+	
+	<node pkg="cmd_vel_to_ackermann_drive" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"/>	
+
+	<!-- ZED -->
+	<arg name="zed_id"                default="0" />
+    <arg name="gpu_id"                default="-1" />
+    
+	<node name="zed_wrapper_node" pkg="zed_wrapper" type="zed_wrapper_node" output="screen">
+
+        <!-- publish odometry frame -->
+        <param name="publish_tf"            value="true" />
+        
+        <!-- Configuration frame camera -->    
+        <param name="odometry_frame"        value="map" />
+        <param name="odometry_topic"        value="odom" />
+        <param name="base_frame"            value="zed_center" />
+        <param name="camera_frame"          value="zed_left_camera" />
+        <param name="depth_frame"           value="zed_depth_camera" />
+        
+        <param name="cloud_frame_id"        value="zed_center" />
+    
+        <!-- ZED parameters -->
+        <param name="zed_id"                value="$(arg zed_id)" />
+
+        <param name="resolution"            value="2" />
+        <param name="quality"               value="1" />
+        <param name="sensing_mode"          value="0" />
+        <param name="frame_rate"            value="30" />
+        <param name="odometry_db"           value="" />
+        <param name="openni_depth_mode"     value="0" />
+        <param name="gpu_id"                value="$(arg gpu_id)" />
+        <param name="confidence"            value="100" />
+        <param name="depth_stabilization"   value="1" />
+
+        <!-- ROS topic names -->
+        <param name="rgb_topic"             value="rgb/image_rect_color" />
+        <param name="rgb_raw_topic"         value="rgb/image_raw_color" />
+        <param name="rgb_cam_info_topic"    value="rgb/camera_info" />
+
+        <param name="left_topic"            value="left/image_rect_color" />
+        <param name="left_raw_topic"        value="left/image_raw_color" />
+        <param name="left_cam_info_topic"   value="left/camera_info" />
+    
+        <param name="right_topic"           value="right/image_rect_color" />
+        <param name="right_raw_topic"       value="right/image_raw_color" />
+        <param name="right_cam_info_topic"  value="right/camera_info" />
+
+        <param name="depth_topic"           value="depth/depth_registered" />
+        <param name="depth_cam_info_topic"  value="depth/camera_info" />
+        
+        <param name="point_cloud_topic"     value="point_cloud/cloud_registered" />
+       
+
+    </node>
+
+</launch>
+
+
+

@@ -1,0 +1,7 @@
+<launch>
+	<param name="use_sim_time" value="false" />
+	<node pkg="car_joystick" type="car_joystick" name="car_joystick"/>
+	<node pkg="joy" type="joy_node" name="joy_node"/>
+	<node pkg="traxxas_driver" type="listener" name="listener"/>
+</launch>
+
