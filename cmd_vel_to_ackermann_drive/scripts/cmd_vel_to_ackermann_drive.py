@@ -7,72 +7,73 @@ from ackermann_msgs.msg import AckermannDrive
 
 
 def convert_trans_rot_vel_to_steering_angle(v, omega, wheelbase):
-  if omega == 0 or v == 0:
-    return 0
+    if omega == 0 or v == 0:
+        return 0
 
-  radius = v / omega
-  return math.atan(wheelbase / radius)
+    radius = v / omega
+    return math.atan(wheelbase / radius)
+
 
 def convert_speed_to_persantage(speed):
-  return 0.064552*speed + 0.11
+    return 0.064552 * speed + 0.11
+
+
 
 def cmd_callback(data):
-  global wheelbase
-  global ackermann_cmd_topic
-  global frame_id
-  global pub
+    global wheelbase
+    global ackermann_cmd_topic
+    global frame_id
+    global pub
 
-  v = data.linear.x
-  
-  steering = 0
-  if(v>0):
-#		if (v>0.45):
-#			v=0.45
-		steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
-		v = convert_speed_to_persantage(v)
-		
-    
-  if(v<0):
-		v =-0.30 + v * 0.7
-#		if (v<-0.35):
-#			v=-0.35
-		steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
-	
+    v = data.linear.x
 
-  msg = AckermannDriveStamped()
-  msg.header.stamp = rospy.Time.now()
-  msg.header.frame_id = frame_id
+    steering = 0
+    if (v > 0):
+        #		if (v>0.45):
+        #			v=0.45
+        steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
+        v = convert_speed_to_persantage(v)
 
-  steering=steering*2
+    if (v < 0):
+        # v =-0.30 + v * 0.7
+        v = v * 0.7
+        #		if (v<-0.35):
+        #			v=-0.35
+        steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
 
-  if (v<0):
-    msg.drive.steering_angle = steering
-  if (v>0):
-    msg.drive.steering_angle = (-1) * steering  
-  msg.drive.speed = v
-  
+    msg = AckermannDriveStamped()
+    msg.header.stamp = rospy.Time.now()
+    msg.header.frame_id = frame_id
 
-  pub.publish(msg.drive)
-  
+    steering = steering * 2
+
+    if (v < 0):
+        msg.drive.steering_angle = steering
+    if (v > 0):
+        msg.drive.steering_angle = (-1) * steering
+    msg.drive.speed = v
+
+    pub.publish(msg.drive)
 
 
-if __name__ == '__main__': 
-  try:
-    
-    rospy.init_node('cmd_vel_to_ackermann_drive')
-        
-    twist_cmd_topic = rospy.get_param('~twist_cmd_topic', '/cmd_vel') 
-    ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/drivecmd')
-    wheelbase = rospy.get_param('~wheelbase', 0.4)
-    frame_id = rospy.get_param('~frame_id', 'base_link')
-    
-    rospy.Subscriber(twist_cmd_topic, Twist, cmd_callback, queue_size=1)
-    pub = rospy.Publisher(ackermann_cmd_topic, AckermannDrive, queue_size=1)
-    
-    rospy.loginfo("Node 'cmd_vel_to_ackermann_drive' started.\nListening to %s, publishing to %s. Frame id: %s, wheelbase: %f", "/cmd_vel", ackermann_cmd_topic, frame_id, wheelbase)
-    
-    rospy.spin()
-    
-  except rospy.ROSInterruptException:
-    pass
+if __name__ == '__main__':
+    try:
 
+        rospy.init_node('cmd_vel_to_ackermann_drive')
+
+        twist_cmd_topic = rospy.get_param('~twist_cmd_topic', '/cmd_vel')
+        ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/drivecmd')
+        wheelbase = rospy.get_param('~wheelbase', 0.4)
+        frame_id = rospy.get_param('~frame_id', 'base_link')
+
+        rospy.Subscriber(twist_cmd_topic, Twist, cmd_callback, queue_size=1)
+        pub = rospy.Publisher(ackermann_cmd_topic, AckermannDrive, queue_size=1)
+
+        rospy.loginfo(
+            "Node 'cmd_vel_to_ackermann_drive' started.\nListening to %s, publishing to %s. Frame id: %s, wheelbase: %f",
+            "/cmd_vel", ackermann_cmd_topic, frame_id, wheelbase)
+
+        rospy.spin()
+
+    except rospy.ROSInterruptException:
+        pass

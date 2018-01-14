@@ -1,0 +1,68 @@
+<?xml version='1.0'?>
+
+<launch>
+
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <rosparam file="$(find racecar_control)/config/racecar_control.yaml" command="load"/>
+
+    <!-- load the controllers -->
+    <node name="controller_manager" pkg="controller_manager" type="spawner" respawn="false"
+          output="screen" ns="/racecar" args="left_rear_wheel_velocity_controller right_rear_wheel_velocity_controller
+                                            left_front_wheel_velocity_controller right_front_wheel_velocity_controller
+                                            left_steering_hinge_position_controller right_steering_hinge_position_controller
+                                            joint_state_controller"/>
+
+    <!-- convert joint states to TF transforms for rviz, etc -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false"
+          output="screen">
+        <remap from="/joint_states" to="/racecar/joint_states"/>
+    </node>
+
+
+    <!-- servo node -->
+    <node pkg="racecar_control" type="servo_commands.py" name="servo_commands" output="screen">
+
+    </node>
+
+    <node pkg="cmd_vel_to_ackermann_drive" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"/>
+
+    <!-- Allow for Gazebo to broadcast odom>
+    <node pkg="racecar_gazebo" name="gazebo_odometry_node" type="gazebo_odometry.py"/-->
+
+    <!-- send fake joint values >
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <param name="use_gui" value="False"/>
+    </node-->
+
+    <node pkg="tf" type="static_transform_publisher" name="odom_to_base_lnk" args="0 0 0 0 0 0 /odom /base_link 100"/>
+
+    <node name="rviz" pkg="rviz" type="rviz"/>
+
+    <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
+        <param name="pub_map_odom_transform" value="true"/>
+        <param name="map_frame" value="map"/>
+        <param name="base_frame" value="base_link"/>
+        <param name="odom_frame" value="odom"/>
+        <param name="map_zsize" value="10000"/>
+    </node>
+
+
+    <!-- Move base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find racecar_navigation)/config/costmap_common_params.yaml" command="load"
+                  ns="local_costmap"/>
+        <rosparam file="$(find racecar_navigation)/config/local_costmap_params.yaml" command="load"/>
+        <rosparam file="$(find racecar_navigation)/config/global_costmap_params.yaml" command="load"/>
+        <rosparam file="$(find racecar_navigation)/config/base_local_planner_params.yaml" command="load"/>
+
+
+        <param name="move_base/DWAPlannerROS/yaw_goal_tolerance" value="1.0"/>
+        <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/>
+
+        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+        <param name="controller_frequency" value="10.0"/>
+
+    </node>
+
+
+</launch>
