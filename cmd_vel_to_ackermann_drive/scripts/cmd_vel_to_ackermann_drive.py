@@ -5,6 +5,105 @@ from geometry_msgs.msg import Twist
 from ackermann_msgs.msg import AckermannDriveStamped
 from ackermann_msgs.msg import AckermannDrive
 
+currentState = 0
+lastSteering = 0
+lastV = 0
+
+
+# state -1 corresponds to the backward motion
+# state 0 corresponds to the break
+# state 1 corresponds to the forward motion
+
+def stateUpdate(v, w):
+    # (1, v+) -> (1)
+    # (1, v-) -> (0)
+    # (1, 0) -> (0)
+    # (0, v+) -> (1)
+    # (0, v-) -> (-1)
+    # (0, 0) -> (0)
+    # (-1, v+) -> (1)
+    # (-1, v-) -> (-1)
+    # (-1, 0) -> (0)
+
+    global currentState
+    global lastSteering
+    global lastV
+
+    delay = 0.2
+
+    steering = 0
+    power = 0
+
+    if (v > 0):
+        # (1, v+) -> (1)
+        # (0, v+) -> (1)
+        # (-1, v+) -> (1)
+
+        if (currentState == 1 or currentState == 0 or currentState == -1):
+            currentState = 1
+            steering = (-1) * convert_trans_rot_vel_to_steering_angle(v, w, wheelbase)
+            power = convert_speed_to_persantage(v)
+
+    if (v < 0):
+        # (1, v-) -> (0)
+        # (0, v-) -> (-1)
+        # (-1, v-) -> (-1)
+
+        if (currentState == 1):
+            currentState = 0
+
+            steering = lastSteering
+            power = -0.9
+            # tsleep = lastV * 4
+            publishAckermannMsg(0, steering)
+            rospy.sleep(delay)
+            publishAckermannMsg(power, steering)
+            rospy.sleep(delay)
+            publishAckermannMsg(0, steering)
+            rospy.sleep(delay)
+
+        if (currentState == 0 or currentState == -1):
+            currentState = -1
+
+            power = convert_speed_to_persantage(v)
+            steering = convert_trans_rot_vel_to_steering_angle(v, w, wheelbase)
+
+    if (v == 0):
+        # (1, 0) -> (0)
+        # (0, 0) -> (0)
+        # (-1, 0) -> (0)
+        previousState = currentState
+
+        if (previousState == 1):
+            power = -0.9
+
+            publishAckermannMsg(0, steering)
+            rospy.sleep(delay)
+            publishAckermannMsg(power, steering)
+            rospy.sleep(delay)
+
+        currentState = 0
+        power = 0
+        steering = lastSteering
+
+    lastSteering = steering
+    lastV = v
+
+    publishAckermannMsg(power, steering)
+
+
+def publishAckermannMsg(power, steering):
+    global currentState
+
+    rospy.loginfo("Info: power: %s, steering: %s, State: %s", power, steering, currentState)
+
+    msg = AckermannDriveStamped()
+    msg.header.stamp = rospy.Time.now()
+    msg.header.frame_id = frame_id
+    msg.drive.steering_angle = steering
+    msg.drive.speed = power
+    pub.publish(msg.drive)
+
 
 def convert_trans_rot_vel_to_steering_angle(v, omega, wheelbase):
     if omega == 0 or v == 0:
@@ -15,8 +114,21 @@ def convert_trans_rot_vel_to_steering_angle(v, omega, wheelbase):
 
 
 def convert_speed_to_persantage(speed):
-    return 0.064552 * speed + 0.11
+    # At this point we don have feedback from sensors
+    # We shoould to find some constants to compensate resistatnce of the system
 
+    global currentState
+
+    forwardVelocityOffset = 0.11
+    backwarddVelocityOffset = -0.30
+
+    if (currentState == 1):
+        return 0.064552 * speed + forwardVelocityOffset
+
+    if (currentState == -1):
+        return speed * 0.3 + backwarddVelocityOffset
+
+    return 0
 
 
 def cmd_callback(data):
@@ -26,34 +138,9 @@ def cmd_callback(data):
     global pub
 
     v = data.linear.x
+    w = data.angular.z
 
-    steering = 0
-    if (v > 0):
-        #		if (v>0.45):
-        #			v=0.45
-        steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
-        v = convert_speed_to_persantage(v)
-
-    if (v < 0):
-        # v =-0.30 + v * 0.7
-        v = v * 0.7
-        #		if (v<-0.35):
-        #			v=-0.35
-        steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
-
-    msg = AckermannDriveStamped()
-    msg.header.stamp = rospy.Time.now()
-    msg.header.frame_id = frame_id
-
-    steering = steering * 2
-
-    if (v < 0):
-        msg.drive.steering_angle = steering
-    if (v > 0):
-        msg.drive.steering_angle = (-1) * steering
-    msg.drive.speed = v
-
-    pub.publish(msg.drive)
+    stateUpdate(v, w)
 
 
 if __name__ == '__main__':
