@@ -29,7 +29,7 @@ def stateUpdate(v, w):
     global lastSteering
     global lastV
 
-    delay = 0.2
+    delay = 0.25
 
     steering = 0
     power = 0
@@ -53,10 +53,8 @@ def stateUpdate(v, w):
             currentState = 0
 
             steering = lastSteering
-            power = -0.9
+            power = -0.3
             # tsleep = lastV * 4
-            publishAckermannMsg(0, steering)
-            rospy.sleep(delay)
             publishAckermannMsg(power, steering)
             rospy.sleep(delay)
             publishAckermannMsg(0, steering)
@@ -77,8 +75,6 @@ def stateUpdate(v, w):
         if (previousState == 1):
             power = -0.9
 
-            publishAckermannMsg(0, steering)
-            rospy.sleep(delay)
             publishAckermannMsg(power, steering)
             rospy.sleep(delay)
 
@@ -119,8 +115,8 @@ def convert_speed_to_persantage(speed):
 
     global currentState
 
-    forwardVelocityOffset = 0.11
-    backwarddVelocityOffset = -0.30
+    forwardVelocityOffset = 0.13
+    backwarddVelocityOffset = -0.33
 
     if (currentState == 1):
         return 0.064552 * speed + forwardVelocityOffset
