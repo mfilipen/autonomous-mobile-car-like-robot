@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 		
-	<node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard"  output="screen"></node>
+	<node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard"  output="screen">
+		<param name="gazeboSimulation" value="True" />
+	</node>
 
 	<node pkg="cmd_vel_to_ackermann_drive" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"/>
 
