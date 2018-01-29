@@ -8,7 +8,9 @@ from ackermann_msgs.msg import AckermannDrive
 currentState = 0
 lastSteering = 0
 lastV = 0
-
+steering = 0
+power = 0
+backwardCount=0
 
 # state -1 corresponds to the backward motion
 # state 0 corresponds to the break
@@ -28,11 +30,12 @@ def stateUpdate(v, w):
     global currentState
     global lastSteering
     global lastV
+    global backwardCount
+    global steering
+    global power
 
-    delay = 0.25
+    delay = 0.4
 
-    steering = 0
-    power = 0
 
     if (v > 0):
         # (1, v+) -> (1)
@@ -41,7 +44,7 @@ def stateUpdate(v, w):
 
         if (currentState == 1 or currentState == 0 or currentState == -1):
             currentState = 1
-            steering = (-1) * convert_trans_rot_vel_to_steering_angle(v, w, wheelbase)
+            steering = convert_trans_rot_vel_to_steering_angle(v, w, wheelbase)
             power = convert_speed_to_persantage(v)
 
     if (v < 0):
@@ -50,15 +53,16 @@ def stateUpdate(v, w):
         # (-1, v-) -> (-1)
 
         if (currentState == 1):
-            currentState = 0
 
+            currentState = 0
             steering = lastSteering
-            power = -0.3
+            power = -0.9
             # tsleep = lastV * 4
             publishAckermannMsg(power, steering)
             rospy.sleep(delay)
             publishAckermannMsg(0, steering)
             rospy.sleep(delay)
+
 
         if (currentState == 0 or currentState == -1):
             currentState = -1
@@ -73,14 +77,14 @@ def stateUpdate(v, w):
         previousState = currentState
 
         if (previousState == 1):
-            power = -0.9
+            power = -0.3
 
-            publishAckermannMsg(power, steering)
+            publishAckermannMsg(power, 0)
             rospy.sleep(delay)
 
         currentState = 0
         power = 0
-        steering = lastSteering
+        steering = 0
 
     lastSteering = steering
     lastV = v
@@ -106,17 +110,32 @@ def convert_trans_rot_vel_to_steering_angle(v, omega, wheelbase):
         return 0
 
     radius = v / omega
-    return math.atan(wheelbase / radius)
+    alpha = math.atan(wheelbase/radius)
+
+    steering=convert_alpha_to_persantage(alpha)
+
+    return steering
+
+def convert_alpha_to_persantage(alpha):
+    # mapping angel to %
+    # f(-1) = pi/6
+    # f(1) = pi/6
+    if abs(alpha > math.pi/6):
+        rospy.loginfo("Info: Out of range. Planner error. alpha: %s. It is more that 0.52", alpha)
+
+    #rospy.loginfo("Info: Alpha: %s.", alpha)
+    return (-1) * 6./math.pi * alpha
 
 
 def convert_speed_to_persantage(speed):
     # At this point we don have feedback from sensors
     # We shoould to find some constants to compensate resistatnce of the system
+    # and map velocity to power of engine
 
     global currentState
 
     forwardVelocityOffset = 0.13
-    backwarddVelocityOffset = -0.33
+    backwarddVelocityOffset = -0.36
 
     if (currentState == 1):
         return 0.064552 * speed + forwardVelocityOffset
