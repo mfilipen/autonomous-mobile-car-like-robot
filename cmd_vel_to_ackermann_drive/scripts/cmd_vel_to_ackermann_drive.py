@@ -150,13 +150,13 @@ def convert_speed_to_persantage(speed):
     global currentState
 
     forwardVelocityOffset = 0.13
-    backwarddVelocityOffset = -0.36
+    backwarddVelocityOffset = -0.0
 
     if (currentState == 1):
         return 0.064552 * speed + forwardVelocityOffset
 
     if (currentState == -1):
-        return speed * 0.3 + backwarddVelocityOffset
+        return speed * 0.04 + backwarddVelocityOffset
 
     return 0
 
