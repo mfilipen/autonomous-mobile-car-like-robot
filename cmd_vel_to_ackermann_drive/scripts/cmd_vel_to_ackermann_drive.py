@@ -10,7 +10,8 @@ lastSteering = 0
 lastV = 0
 steering = 0
 power = 0
-backwardCount=0
+backwardCount = 0
+
 
 # state -1 corresponds to the backward motion
 # state 0 corresponds to the break
@@ -27,11 +28,11 @@ def stateUpdate(v, w):
     # (-1, v-) -> (-1)
     # (-1, 0) -> (0)
 
-    #It is from parameter server
+    # It is from parameter server
     global wheelbase
     global gazeboSimulation
 
-    #it is for describe curent state of system
+    # it is for describe curent state of system
     global currentState
     global lastSteering
     global lastV
@@ -39,9 +40,7 @@ def stateUpdate(v, w):
     global steering
     global power
 
-
     delay = 0.4
-
 
     if (v > 0):
         # (1, v+) -> (1)
@@ -61,7 +60,7 @@ def stateUpdate(v, w):
         if (currentState == 1):
             power = -0.9
 
-            if (gazeboSimulation==True):
+            if (gazeboSimulation == True):
                 power = 0
 
             currentState = 0
@@ -70,7 +69,6 @@ def stateUpdate(v, w):
             rospy.sleep(delay)
             publishAckermannMsg(0, steering)
             rospy.sleep(delay)
-
 
         if (currentState == 0 or currentState == -1):
             currentState = -1
@@ -122,27 +120,32 @@ def convert_trans_rot_vel_to_steering_angle(v, omega, wheelbase):
         return 0
 
     radius = v / omega
-    alpha = math.atan(wheelbase/radius)
+    alpha = math.atan(wheelbase / radius)
 
-    steering=convert_alpha_to_persantage(alpha)
+    steering = convert_alpha_to_persantage(alpha)
 
     return steering
+
 
 def convert_alpha_to_persantage(alpha):
     # mapping angel to %
     # f(-1) = pi/6
     # f(1) = pi/6
-    if abs(alpha > math.pi/6):
+    if abs(alpha > math.pi / 6):
         rospy.loginfo("Info: Out of range. Planner error. alpha: %s. It is more that 0.52", alpha)
 
-    #rospy.loginfo("Info: Alpha: %s.", alpha)
-    return (-1) * 6./math.pi * alpha
+    # rospy.loginfo("Info: Alpha: %s.", alpha)
+    return (-1) * 6. / math.pi * alpha
 
 
 def convert_speed_to_persantage(speed):
     # At this point we don have feedback from sensors
     # We shoould to find some constants to compensate resistatnce of the system
     # and map velocity to power of engine
+    global gazeboSimulation
+
+    if (gazeboSimulation):
+        return speed
 
     global currentState
 
@@ -159,7 +162,6 @@ def convert_speed_to_persantage(speed):
 
 
 def cmd_callback(data):
-
     global ackermann_cmd_topic
     global frame_id
     global pub
@@ -178,7 +180,7 @@ if __name__ == '__main__':
         twist_cmd_topic = rospy.get_param('~twist_cmd_topic', '/cmd_vel')
         ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/drivecmd')
         wheelbase = rospy.get_param('~wheelbase', 0.4)
-        gazeboSimulation = rospy.get_param('gazeboSimulation', False)
+        gazeboSimulation = rospy.get_param('~gazeboSimulation', False)
         frame_id = rospy.get_param('~frame_id', 'base_link')
 
         rospy.Subscriber(twist_cmd_topic, Twist, cmd_callback, queue_size=1)

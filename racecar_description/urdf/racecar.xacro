@@ -224,7 +224,7 @@
   </joint>
 
 
-	<!-- full zed camera config -->
+<!-- full zed camera config -->
 
   <joint name="zed_camera_joint" type="fixed">
     <origin xyz="0.295 0 0.138" rpy="0 0 0"/>

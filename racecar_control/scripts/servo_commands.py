@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import rospy
+import rospy, math
 from std_msgs.msg import Bool
 from std_msgs.msg import Float32
 from std_msgs.msg import Float64
@@ -19,8 +19,14 @@ def set_throttle_steer(data):
     pub_pos_left_steering_hinge = rospy.Publisher('/racecar/left_steering_hinge_position_controller/command', Float64, queue_size=1)
     pub_pos_right_steering_hinge = rospy.Publisher('/racecar/right_steering_hinge_position_controller/command', Float64, queue_size=1)
 
+    #
+
     throttle = data.speed/0.01
-    steer = (-1) * data.steering_angle
+    steer = (-1) * data.steering_angle * math.pi/6
+
+    if (abs(steer) > math.pi/6):
+        steet= steer/abs(steer) * math.pi/6
+
 
     pub_vel_left_rear_wheel.publish(throttle)
     pub_vel_right_rear_wheel.publish(throttle)

@@ -2,7 +2,7 @@
 <launch>
   <arg name="world_name" default="racecar" />
   <arg name="gui" default="true" />
-  <arg name="run_camera" default="false"/>
+  <arg name="run_camera" default="true"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find racecar_gazebo)/worlds/$(arg world_name).world"/>
@@ -11,6 +11,7 @@
 
   <!-- urdf xml robot description loaded on the Parameter Server, converting the xacro into a proper urdf file-->
   <param name="robot_description" command="$(find xacro)/xacro '$(find racecar_description)/urdf/racecar.xacro'" />
+  <param name="run_camera" value="true"/>
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="racecar_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model racecar -z 0.05" />

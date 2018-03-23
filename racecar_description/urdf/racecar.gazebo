@@ -93,7 +93,7 @@
 
 <!-- zed camera -->
 <xacro:unless value="$(optenv DISABLE_GAZEBO_CAMERA false)">
-  <gazebo reference="camera_link">
+  <gazebo reference="zed_left_camera">
     <sensor type="camera" name="zed_camera_left_sensor">
       <update_rate>30.0</update_rate>
       <!-- math.atan(320 / 687.8065795898438) * 2 -->
@@ -120,7 +120,7 @@
         <cameraName>/camera/zed</cameraName>
         <imageTopicName>rgb/image_rect_color</imageTopicName>
         <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
-        <frameName>camera_link</frameName>
+        <frameName>zed_left_camera</frameName>
         <hackBaseline>0</hackBaseline><!-- set this to 0.12 for the second camera -->
         <distortionK1>0.0</distortionK1>
         <distortionK2>0.0</distortionK2>
