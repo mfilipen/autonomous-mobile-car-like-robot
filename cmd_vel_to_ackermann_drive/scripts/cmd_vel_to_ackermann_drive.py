@@ -40,7 +40,7 @@ def stateUpdate(v, w):
     global steering
     global power
 
-    delay = 0.4
+    delay = 0.1
 
     if (v > 0):
         # (1, v+) -> (1)
@@ -131,11 +131,11 @@ def convert_alpha_to_persantage(alpha):
     # mapping angel to %
     # f(-1) = pi/6
     # f(1) = pi/6
-    if abs(alpha > math.pi / 6):
-        rospy.loginfo("Info: Out of range. Planner error. alpha: %s. It is more that 0.52", alpha)
+    if abs(alpha > 0.145 * math.pi ):
+        rospy.loginfo("Info: Out of range. Planner error. alpha: %s. It is more that 0.45", alpha)
 
     # rospy.loginfo("Info: Alpha: %s.", alpha)
-    return (-1) * 6. / math.pi * alpha
+    return (-1) *  1 / (0.145 * math.pi) * alpha
 
 
 def convert_speed_to_persantage(speed):
@@ -149,14 +149,16 @@ def convert_speed_to_persantage(speed):
 
     global currentState
 
+
+
     forwardVelocityOffset = 0.13
-    backwarddVelocityOffset = -0.0
+    backwarddVelocityOffset = -0.36
 
     if (currentState == 1):
         return 0.064552 * speed + forwardVelocityOffset
 
     if (currentState == -1):
-        return speed * 0.04 + backwarddVelocityOffset
+        return speed * 0.3 + backwarddVelocityOffset
 
     return 0
 
@@ -179,7 +181,7 @@ if __name__ == '__main__':
 
         twist_cmd_topic = rospy.get_param('~twist_cmd_topic', '/cmd_vel')
         ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/drivecmd')
-        wheelbase = rospy.get_param('~wheelbase', 0.4)
+        wheelbase = rospy.get_param('~wheelbase', 0.325)
         gazeboSimulation = rospy.get_param('~gazeboSimulation', False)
         frame_id = rospy.get_param('~frame_id', 'base_link')
 

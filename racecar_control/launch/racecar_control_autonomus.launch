@@ -24,7 +24,9 @@
 
     </node>
 
-    <node pkg="cmd_vel_to_ackermann_drive" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"/>
+    <node pkg="cmd_vel_to_ackermann_drive" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive">
+		<param name="gazeboSimulation" value="True" />
+	</node>
 
     <!-- Allow for Gazebo to broadcast odom>
     <node pkg="racecar_gazebo" name="gazebo_odometry_node" type="gazebo_odometry.py"/-->

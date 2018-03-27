@@ -7,6 +7,13 @@ from ackermann_msgs.msg import AckermannDrive
 
 flag_move = 0
 
+def get_r(alpha):
+    L = 0.325 #wheelBase
+    r = L/math.tan(alpha)
+    return r
+
+
+
 def set_throttle_steer(data):
 
     global flag_move
@@ -22,18 +29,28 @@ def set_throttle_steer(data):
     #
 
     throttle = data.speed/0.01
-    steer = (-1) * data.steering_angle * math.pi/6
+    steer = (-1) * data.steering_angle * 0.145 * math.pi
 
-    if (abs(steer) > math.pi/6):
-        steet= steer/abs(steer) * math.pi/6
+    if (abs(steer) > 0.145 * math.pi):
+        steet= steer/abs(steer) * 0.145 * math.pi
 
+    if (steer != 0) :
+        L = 0.325
+        T = 0.2
+        r = get_r(steer)
+
+        steerInner = math.atan(L / (r - T/2) )
+        steerOuter = math.atan(L / (r + T/2) )
+    else:
+        steerInner = steer
+        steerOuter = steer
 
     pub_vel_left_rear_wheel.publish(throttle)
     pub_vel_right_rear_wheel.publish(throttle)
     pub_vel_left_front_wheel.publish(throttle)
     pub_vel_right_front_wheel.publish(throttle)
-    pub_pos_left_steering_hinge.publish(steer)
-    pub_pos_right_steering_hinge.publish(steer)
+    pub_pos_left_steering_hinge.publish(steerInner)
+    pub_pos_right_steering_hinge.publish(steerOuter)
 
 def servo_commands():
 
