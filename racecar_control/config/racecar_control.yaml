@@ -28,9 +28,9 @@ racecar:
   left_steering_hinge_position_controller:
     joint: left_steering_hinge_joint
     type: effort_controllers/JointPositionController
-    pid: {p: 0.5, i: 0.3, d: 0}
+    pid: {p: 0.5, i: 0, d: 0}
   right_steering_hinge_position_controller:
     joint: right_steering_hinge_joint
     type: effort_controllers/JointPositionController
-    pid: {p: 0.5, i: 0.3, d: 0}
+    pid: {p: 0.5, i: 0, d: 0}
 
