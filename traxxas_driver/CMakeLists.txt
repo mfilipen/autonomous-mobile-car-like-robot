@@ -126,9 +126,9 @@ include_directories(
 )
 
 
-add_executable(listener src/listener.cpp)
-target_link_libraries(listener ${catkin_LIBRARIES} JHPWMP)
-add_dependencies(listener traxxas_driver_generate_messages_cpp JHPWMP)
+#add_executable(listener src/listener.cpp)
+#target_link_libraries(listener ${catkin_LIBRARIES} JHPWMP)
+#add_dependencies(listener traxxas_driver_generate_messages_cpp JHPWMP)
 
 add_executable(listener_old src/listener_old.cpp)
 target_link_libraries(listener_old ${catkin_LIBRARIES} JHPWMP)
