@@ -1,0 +1,4 @@
+*.bag
+*~
+.catkin_workspace
+.idea/
