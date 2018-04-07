@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+    <param name="use_sim_time" value="false"/>
+
+    <!-- move -->
+    <node pkg="car_joystick" type="car_joystick" name="car_joystick"/>
+    <node pkg="joy" type="joy_node" name="joy_node"/>
+    <node pkg="traxxas_driver" type="listener_old" name="listener_old"/>
+
+    <!-- lidar -->
+    <node pkg="urg_node" type="urg_node" name="hokuyo" >
+		    <param name="frame_id" value="laser" />
+		    <param name="max_ang" value="2.356194496154785" />
+        <param name="min_ang" value="-2.356194496154785" />
+	  </node>
+
+    <!-- imu -->
+    <include file="$(find razor_imu_9dof)/launch/razor-pub.launch"/>
+
+    <!-- zed -->
+    <include file="$(find zed_wrapper)/launch/zed.launch"/>
+
+    <!-- pylon -->
+    <include file="$(find pylon_camera)/launch/pylon_camera_node.launch"/>
+
+</launch>
+
+
+
