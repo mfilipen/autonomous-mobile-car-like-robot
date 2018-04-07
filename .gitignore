@@ -2,3 +2,5 @@
 *~
 .catkin_workspace
 .idea/
+*.png
+
