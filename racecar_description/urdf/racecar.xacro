@@ -229,19 +229,37 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.0293 0.029 0.029"/>
+        <box size="0.033 0.029 0.029"/>
       </geometry>
-      <material name="gray"/>
+      <material name="orange"/>
     </visual>
   </link>
 
-   <joint name="base_basler_camera_joint" type="fixed">
+  <joint name="base_basler_camera_joint" type="fixed">
     <axis xyz="0 0 0" />
-    <origin xyz="0.145 0.0 0.208" rpy="0 0 0"/>
+    <origin xyz="0.145 0.0 0.218" rpy="0 0 0"/>
     <parent link="chassis"/>
     <child link="base_basler_camera_link"/>
   </joint>
 
+  <link name="base_basler_camera_lens_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57 0"/>
+      <geometry>
+         <cylinder length="0.033" radius="0.0140"/>
+      </geometry>
+      <material name="dark_grey">
+                <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="base_basler_camera_lens_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0.033 0 0" rpy="0 0 0"/>
+    <parent link="base_basler_camera_link"/>
+    <child link="base_basler_camera_lens_link"/>
+  </joint>
 
 <!-- full zed camera config -->
 
