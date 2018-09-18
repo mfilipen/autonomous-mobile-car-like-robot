@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+	<param name="use_sim_time" value="true" />
+
+	
+
+	<node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" output="screen">
+		<param name=" is_stamped" value="true"/>
+
+    	</node>
+
+
+</launch>
+
+
